@@ -6,10 +6,6 @@ class Config:
     API_ID = config("API_ID", cast=int)
     API_HASH = config("API_HASH")
     
-    # Get from @BotFather (optional - for bot features)
-    BOT_TOKEN = config("BOT_TOKEN", default="")
-    BOT_SESSION = config("BOT_SESSION", default="bot")
-    
     # Your Telegram Phone Number (for userbot)
     PHONE_NUMBER = config("PHONE_NUMBER", default="")
     
@@ -31,3 +27,4 @@ class temp(object):
     IS_FRWD_CHAT = []
     CHAIN_SETUP = {}
     USER_CLIENT = None  # Store user client globally
+    CHAIN_CONFIGS = {}  # Store chain configurations
