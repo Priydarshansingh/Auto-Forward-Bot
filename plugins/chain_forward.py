@@ -1,13 +1,16 @@
 import asyncio
 import re
 import logging
+import time
 from database import db
 from config import Config, temp
 from translation import Translation
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.errors import FloodWait
+from rich.console import Console
 
+console = Console()
 logger = logging.getLogger(__name__)
 
 # Store pending chain operations
@@ -18,10 +21,9 @@ async def setup_chain_forward(bot, message):
     """Setup chain forwarding configuration"""
     user_id = message.from_user.id
     
-    # Check if user has bot configured
-    _bot = await db.get_bot(user_id)
-    if not _bot:
-        return await message.reply("<code>You didn't add any bot. Please add a bot using /settings !</code>")
+    # Check if userbot is available
+    if not temp.USER_CLIENT:
+        return await message.reply("❌ **Userbot not available!** Please restart the bot.")
     
     # Get user channels
     channels = await db.get_user_channels(user_id)
@@ -165,6 +167,10 @@ async def save_chain_config(user_id, source_chat_id, source_title, converter_bot
 async def monitor_source_channels(bot, message):
     """Monitor source channels for new posts with links"""
     try:
+        # Only process if this is from userbot
+        if not temp.USER_CLIENT or bot != temp.USER_CLIENT:
+            return
+            
         # Get all active chain configurations
         chain_configs = await db.db.chain_configs.find({'active': True}).to_list(None)
         
@@ -215,18 +221,15 @@ async def process_chain_forward(bot, original_message, config):
         converter_bot = config['converter_bot']
         target_chat_id = config['target_chat_id']
         
-        # Get user's bot
-        user_bot = await db.get_bot(user_id)
-        if not user_bot:
-            logger.error(f"No bot found for user {user_id}")
+        # Use the userbot client
+        if not temp.USER_CLIENT:
+            logger.error(f"Userbot not available for user {user_id}")
             return
         
-        # Import and start user's bot
-        from .test import CLIENT, start_clone_bot
-        client = CLIENT()
-        user_client = await start_clone_bot(client.client(user_bot))
+        user_client = temp.USER_CLIENT
         
         # Step 1: Forward original message to converter bot
+        console.print(f"[cyan]🔄 Forwarding message to @{converter_bot}[/cyan]")
         forwarded_msg = await user_client.forward_messages(
             chat_id=converter_bot,
             from_chat_id=original_message.chat.id,
@@ -241,21 +244,26 @@ async def process_chain_forward(bot, original_message, config):
             'target_chat_id': target_chat_id,
             'converter_bot': converter_bot,
             'forwarded_msg_id': forwarded_msg.id,
-            'timestamp': asyncio.get_event_loop().time()
+            'timestamp': time.time(),
+            'user_id': user_id
         }
         
         # Set up timeout (5 minutes)
         asyncio.create_task(cleanup_operation(operation_id, 300))
         
-        logger.info(f"Chain operation started: {operation_id}")
+        console.print(f"[green]✅ Chain operation started: {operation_id}[/green]")
         
     except Exception as e:
-        logger.error(f"Error in process_chain_forward: {e}")
+        console.print(f"[red]❌ Error in process_chain_forward: {e}[/red]")
 
 @Client.on_message(filters.private)
 async def handle_converter_replies(bot, message):
     """Handle replies from converter bots"""
     try:
+        # Only process if this is from userbot
+        if not temp.USER_CLIENT or bot != temp.USER_CLIENT:
+            return
+            
         if not message.reply_to_message:
             return
         
@@ -264,6 +272,8 @@ async def handle_converter_replies(bot, message):
             if (message.chat.username == operation['converter_bot'] and 
                 message.reply_to_message.id == operation['forwarded_msg_id']):
                 
+                console.print(f"[cyan]📤 Posting converted result to target channel[/cyan]")
+                
                 # Step 3: Forward the converted reply to target channel
                 await operation['user_client'].copy_message(
                     chat_id=operation['target_chat_id'],
@@ -271,27 +281,22 @@ async def handle_converter_replies(bot, message):
                     message_id=message.id
                 )
                 
-                logger.info(f"Chain operation completed: {operation_id}")
+                console.print(f"[green]✅ Chain operation completed: {operation_id}[/green]")
                 
-                # Clean up
-                await operation['user_client'].stop()
+                # Clean up (don't stop the client, just remove from operations)
                 del CHAIN_OPERATIONS[operation_id]
                 break
                 
     except Exception as e:
-        logger.error(f"Error in handle_converter_replies: {e}")
+        console.print(f"[red]❌ Error in handle_converter_replies: {e}[/red]")
 
 async def cleanup_operation(operation_id, timeout):
     """Clean up chain operation after timeout"""
     await asyncio.sleep(timeout)
     
     if operation_id in CHAIN_OPERATIONS:
-        try:
-            await CHAIN_OPERATIONS[operation_id]['user_client'].stop()
-        except:
-            pass
         del CHAIN_OPERATIONS[operation_id]
-        logger.info(f"Chain operation timed out: {operation_id}")
+        console.print(f"[yellow]⏰ Chain operation timed out: {operation_id}[/yellow]")
 
 @Client.on_message(filters.private & filters.command(["chainlist"]))
 async def list_chain_configs(bot, message):
