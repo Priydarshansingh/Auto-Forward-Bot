@@ -1,13 +1,21 @@
-from os import environ 
+import os
+from decouple import config
 
 class Config:
-    API_ID = environ.get("API_ID", "577678")
-    API_HASH = environ.get("API_HASH", "d2c6e01uuiuiouioiuiou0fc6d7a1be")
-    BOT_TOKEN = environ.get("BOT_TOKEN", "70955...") 
-    BOT_SESSION = environ.get("BOT_SESSION", "bot") 
-    DATABASE_URI = environ.get("DATABASE", "mongodb+srv://chhjgjkkjhkjhkjh@cluster0.xowzpr4.mongodb.net/")
-    DATABASE_NAME = environ.get("DATABASE_NAME", "forward-bot")
-    BOT_OWNER_ID = [int(id) for id in environ.get("BOT_OWNER_ID", '6964148334').split()]
+    # Get from https://my.telegram.org
+    API_ID = config("API_ID", cast=int)
+    API_HASH = config("API_HASH")
+    
+    # Get from @BotFather
+    BOT_TOKEN = config("BOT_TOKEN")
+    BOT_SESSION = config("BOT_SESSION", default="bot")
+    
+    # MongoDB Database (you can use MongoDB Atlas free tier)
+    DATABASE_URI = config("DATABASE_URI")
+    DATABASE_NAME = config("DATABASE_NAME", default="forward-bot")
+    
+    # Your Telegram User ID (get from @userinfobot)
+    BOT_OWNER_ID = [int(id) for id in config("BOT_OWNER_ID", default="").split(",") if id.strip()]
 
 class temp(object): 
     lock = {}
@@ -16,4 +24,3 @@ class temp(object):
     BANNED_USERS = []
     IS_FRWD_CHAT = []
     CHAIN_SETUP = {}
-    
