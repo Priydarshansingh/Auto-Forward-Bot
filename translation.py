@@ -15,6 +15,7 @@ class Translation(object):
 <u>**📚 Available commands:**</u>
 <b>⏣ __/start - check I'm alive__ 
 ⏣ __/forward - forward messages__
+⏣ __/chain - set up automated chain forwarding__
 ⏣ __/unequify - delete duplicate messages in channels__
 ⏣ __/settings - configure your settings__
 ⏣ __/reset - reset your settings__</b>
@@ -22,6 +23,7 @@ class Translation(object):
 <b><u>💢 Features:</b></u>
 <b>► __Forward message from public channel to your channel without admin permission. if the channel is private need admin permission__
 ► __Forward message from private channel to your channel by using userbot(user must be member in there)__
+► __Automated chain forwarding for link conversion (TeraBox, etc.)__
 ► __custom caption__
 ► __custom button__
 ► __support restricted chats__
@@ -111,3 +113,25 @@ class Translation(object):
 <i>° If the **SOURCE CHAT** is private your userbot must be member or your bot must be admin in there also</b></i>
 
 <b>If the above is checked then the yes button can be clicked</b>"""
+
+  CHAIN_HELP = """<b><u>🔗 CHAIN FORWARDING HELP</b></u>
+
+<b>Chain forwarding creates an automated workflow:</b>
+
+<b>📥 Step 1:</b> Bot monitors source channel for posts with links
+<b>🤖 Step 2:</b> Automatically forwards to converter bot (e.g., @TeraBoxRobot)  
+<b>⏳ Step 3:</b> Waits for converter bot's reply with modified links
+<b>📤 Step 4:</b> Posts the converted result to your target channel
+
+<b><u>Available Commands:</u></b>
+<b>• /chain</b> - Set up chain forwarding
+<b>• /chainlist</b> - View current configuration  
+<b>• /chainon</b> - Enable chain forwarding
+<b>• /chainoff</b> - Disable chain forwarding
+
+<b><u>Requirements:</u></b>
+<b>• Your bot must be admin in target channel</b>
+<b>• Source channel must be accessible to your bot</b>
+<b>• Converter bot must respond to forwarded messages</b>
+
+<b>Perfect for TeraBox, MirroBox, and similar link converters!</b>"""

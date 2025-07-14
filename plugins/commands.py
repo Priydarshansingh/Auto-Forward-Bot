@@ -53,6 +53,8 @@ async def helpcb(bot, query):
             [[
             InlineKeyboardButton('ʜᴏᴡ ᴛᴏ ᴜsᴇ ᴍᴇ ❓', callback_data='how_to_use')
             ],[
+            InlineKeyboardButton('🔗 ᴄʜᴀɪɴ ғᴏʀᴡᴀʀᴅ', callback_data='chain_help')
+            ],[
             InlineKeyboardButton('⚙️ sᴇᴛᴛɪɴɢs ', callback_data='settings#main'),
             InlineKeyboardButton('📜 sᴛᴀᴛᴜs ', callback_data='status')
             ],[
@@ -64,6 +66,14 @@ async def helpcb(bot, query):
 async def how_to_use(bot, query):
     await query.message.edit_text(
         text=Translation.HOW_USE_TXT,
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('↩ Back', callback_data='help')]]),
+        disable_web_page_preview=True
+    )
+
+@Client.on_callback_query(filters.regex(r'^chain_help'))
+async def chain_help(bot, query):
+    await query.message.edit_text(
+        text=Translation.CHAIN_HELP,
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('↩ Back', callback_data='help')]]),
         disable_web_page_preview=True
     )

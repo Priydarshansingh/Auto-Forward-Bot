@@ -6,6 +6,7 @@ Advance Telegram Bot that can work as Message/Files Forwarder from Restricted or
 - Forward public/private channel messages for private user login needed as forward method
 - Save/clone individual post by its post link
 - Can save multiple post link via `batch` command up to 10K
+- **NEW: Automated Chain Forwarding** - Set up automated workflows for link conversion (TeraBox, etc.)
 
 ## Deployment Methods
 
@@ -52,6 +53,10 @@ Advance Telegram Bot that can work as Message/Files Forwarder from Restricted or
 - ```/cancel``` - to cancel the onging /batch task
 - ```/stats``` - to viewing the statics of bot
 - `/forward or /fwd` - to start forward
+- `/chain` - set up automated chain forwarding for link conversion
+- `/chainlist` - view current chain forwarding configuration
+- `/chainon` - enable chain forwarding
+- `/chainoff` - disable chain forwarding
 - `restart` - to restart the bot
 - `/resetall` - to reset unlink all other users / bot
 - `/broadcast` - send bulk message to all users who ever have started the bot
